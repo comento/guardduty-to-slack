@@ -1,0 +1,33 @@
+service: go-guardduty-to-slack
+
+frameworkVersion: '2'
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: go1.x
+  stage: dev
+  region: ap-northeast-2
+  profile: comento-1
+  memorySize: 128
+  deploymentBucket:
+    name: comento-serverless
+  lambdaHashingVersion: 20201221
+  environment:
+    WEBHOOK_URL: ${env:WEBHOOK_URL}
+
+package:
+  patterns:
+    - '!./**'
+    - ./bin/**
+
+functions:
+  alert:
+    handler: bin/alert
+    events:
+      - cloudwatchEvent:
+          event:
+            source:
+              - aws.guardduty
+            detail-type:
+              - GuardDuty Finding
